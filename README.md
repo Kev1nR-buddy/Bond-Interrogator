@@ -25,6 +25,7 @@ You can use the included `Dockerfile` and `build.fsx` script to deploy your appl
 
 Documentation specifically related to this tutorial application can be found at [The Bond Interrogator tutorial](https://wordpress.com/pages/utterlyuseless.home.blog/bond-interrogator/first-steps).
 
+
 ## SAFE Stack Documentation
 
 You will find more documentation about the used F# components at the following places:
