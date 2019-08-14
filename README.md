@@ -23,7 +23,7 @@ fake build -t Run
 
 You can use the included `Dockerfile` and `build.fsx` script to deploy your application as Docker container. You can find more regarding this topic in the [official template documentation](https://safe-stack.github.io/docs/template-docker/).
 
-Documentation specifically related to this tutorial application can be found at [The Bond Interrogator tutorial](https://wordpress.com/pages/utterlyuseless.home.blog/bond-interrogator/first-steps).
+Documentation specifically related to this tutorial application can be found at [The Bond Interrogator tutorial](https://wordpress.com/pages/utterlyuseless.home.blog/bond-interrogator).
 
 
 ## SAFE Stack Documentation

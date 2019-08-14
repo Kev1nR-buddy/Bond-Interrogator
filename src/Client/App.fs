@@ -81,8 +81,8 @@ let safeComponents =
 let navBrand =
     Navbar.Brand.div [ ]
         [ Navbar.Item.a
-            [ Navbar.Item.Props [ Href "https://safe-stack.github.io/" ] ]
-            [ img [ Src "https://safe-stack.github.io/images/safe_top.png"
+            [ Navbar.Item.Props [] ]
+            [ img [ Src "007_tranparent.png"
                     Alt "Logo" ] ] ]
 
 let navMenu =
@@ -90,14 +90,14 @@ let navMenu =
         [ Navbar.End.div [ ]
             [ Navbar.Item.a [ ]
                 [
-                  a [ Href "https://wordpress.com/pages/utterlyuseless.home.blog" ] [ str "Documentation"]
+                  a [   Href "https://utterlyuseless.home.blog/bond-interrogator/" ] [ str "Documentation"]
                 ]
               Navbar.Item.div [ ]
                 [ Button.a
                     [ Button.Color IsWhite
                       Button.IsOutlined
                       Button.Size IsSmall
-                      Button.Props [ Href "https://github.com/SAFE-Stack/SAFE-template" ] ]
+                      Button.Props [ Href "https://github.com/Kev1nR/Bond-Interrogator" ] ]
                     [ Icon.icon [ ]
                         [ Fa.i [Fa.Brand.Github; Fa.FixedWidth] [] ]
                       span [ ] [ str "View Source" ] ] ] ] ]
