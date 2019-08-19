@@ -21,6 +21,7 @@ type Model =
       BondFilm : BondFilm option
       BondFilmList : BondFilm list option
       CurrentFilm : int option
+      IsBurgerOpen : bool
     }
 
 // The Msg type defines what events/actions can occur while the application is running
@@ -28,12 +29,13 @@ type Model =
 type Msg =
 | BondFilmListLoaded of BondFilm list
 | BondFilmSelected of BondFilm
+| ToggleBurger
 
 let initialFilms () = Fetch.fetchAs<BondFilm list> "/api/films"
 
 // defines the initial state and initial command (= side-effect) of the application
 let init () : Model * Cmd<Msg> =
-    let initialModel = { ValidationError = None; ServerState = Loading;  BondFilm = None; BondFilmList = None; CurrentFilm = None }
+    let initialModel = { ValidationError = None; ServerState = Loading;  BondFilm = None; BondFilmList = None; CurrentFilm = None; IsBurgerOpen = false }
     let loadBondFilmsCmd =
         Cmd.OfPromise.perform initialFilms () BondFilmListLoaded
     initialModel, loadBondFilmsCmd
@@ -48,8 +50,9 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         let nextModel = { currentModel with BondFilm = Some b; CurrentFilm = Some b.SequenceId }
         nextModel, Cmd.none
     | _, BondFilmListLoaded films ->
-        let nextModel = { ValidationError = None; ServerState = Loading;  BondFilm = None; BondFilmList = Some films; CurrentFilm = None }
+        let nextModel = { ValidationError = None; ServerState = Loading;  BondFilm = None; BondFilmList = Some films; CurrentFilm = None; IsBurgerOpen = false }
         nextModel, Cmd.none
+    | _, ToggleBurger -> { currentModel with IsBurgerOpen = not currentModel.IsBurgerOpen }, Cmd.none
     | _ -> currentModel, Cmd.none
 
 
@@ -78,15 +81,22 @@ let safeComponents =
           str " powered by: "
           components ]
 
-let navBrand =
+let navBrand isBurgerOpen dispatch =
     Navbar.Brand.div [ ]
         [ Navbar.Item.a
             [ Navbar.Item.Props [] ]
             [ img [ Src "007_tranparent.png"
-                    Alt "Logo" ] ] ]
+                    Alt "Logo" ] ]
+          Navbar.burger [ Modifiers [ ]
+                          CustomClass (if isBurgerOpen then "is-active" else "")
+                          Props [
+                            OnClick (fun _ -> dispatch ToggleBurger) ] ]
+                        [ span [ ] [ ]
+                          span [ ] [ ]
+                          span [ ] [ ] ] ]
 
-let navMenu =
-    Navbar.menu [ ]
+let navMenu isBurgerOpen =
+    Navbar.menu [ Navbar.Menu.IsActive isBurgerOpen ]
         [ Navbar.End.div [ ]
             [ Navbar.Item.a [ ]
                 [
@@ -169,8 +179,8 @@ let view (model : Model) (dispatch : Msg -> unit) =
             [ Hero.head [ ]
                 [ Navbar.navbar [ ]
                     [ Container.container [ ]
-                        [ navBrand
-                          navMenu ] ] ]
+                        [ navBrand (model.IsBurgerOpen) dispatch
+                          navMenu (model.IsBurgerOpen)] ] ]
               Hero.body [ ]
                 [ Container.container [ Container.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ]
                     [ Heading.p [ ]
@@ -181,6 +191,19 @@ let view (model : Model) (dispatch : Msg -> unit) =
 
           Container.container [ ]
             [ filmInfo model ]
+          div [ ]
+            [ Message.message [ ]
+                [ Message.body [ Modifiers [ Modifier.IsHidden (Screen.Tablet, true) ] ]
+                    [ str "Visibile only on mobile" ] ]
+              Message.message [ ]
+                [ Message.body [ Modifiers [ Modifier.IsHidden (Screen.Desktop, true) ] ]
+                    [ str "Visibile only on touch screens" ] ]
+              Message.message [ ]
+                [ Message.body [ Modifiers [ Modifier.IsHiddenOnly (Screen.Desktop, true) ] ]
+                    [ str "Hidden only on desktop" ] ]
+              Message.message [ ]
+                [ Message.body [ Modifiers [ Modifier.IsHidden (Screen.Mobile, true) ] ]
+                    [ str "Hidden only on mobile" ] ] ]
 
           footer [ ClassName "footer" ]
             [ footerContainer ] ]
