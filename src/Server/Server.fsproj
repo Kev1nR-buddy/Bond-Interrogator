@@ -9,5 +9,9 @@
         <Compile Include="..\Shared\Shared.fs" />
         <Compile Include="Server.fs" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.4" />
+      <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.4.2" />
+    </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
