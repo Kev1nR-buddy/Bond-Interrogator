@@ -15,7 +15,7 @@ let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" 
 
 let publicPath = Path.GetFullPath "../Client/public"
 
-let storageConnString = "DefaultEndpointsProtocol=https;AccountName=kbrstorageaccount;AccountKey=9f3T1Fco4+c2N9zXI5plUL0sh67lEsxbeNlhHwQ1nRgYZutJeD1w7IQYSQhDtYx1Glb+QA18E/rUxqjtB2xz1g==;EndpointSuffix=core.windows.net"
+let storageConnString = ""
 let storageAccount = CloudStorageAccount.Parse(storageConnString)
 // Create the table client.
 let tableClient = storageAccount.CreateCloudTableClient()
