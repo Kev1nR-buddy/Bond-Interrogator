@@ -8,8 +8,9 @@ open Giraffe
 open Saturn
 open Shared
 open Microsoft.Azure.Documents.Client
+open Microsoft.Azure.Storage
 open Microsoft.Azure.Cosmos.Table
-
+open AzureServices
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
@@ -27,6 +28,18 @@ let query =
         TableQuery.GenerateFilterCondition(
             "PartitionKey", QueryComparisons.Equal, "BondFilm"))
 
+let getEnemies bondFilmSequenceId =
+    tableClient.GetTableReference("TheEnemy")
+               .ExecuteQuery(
+                   TableQuery().Where(sprintf "PartitionKey eq '%d'" bondFilmSequenceId))
+    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue })
+
+let getGirls bondFilmSequenceId =
+    tableClient.GetTableReference("TheGirls")
+               .ExecuteQuery(
+                   TableQuery().Where(sprintf "PartitionKey eq '%d'" bondFilmSequenceId))
+    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue })
+
 let port =
     "SERVER_PORT"
     |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
@@ -41,17 +54,24 @@ let webApp = router {
         task {
             let movieList = table.ExecuteQuery(query)
                             |> Seq.map (fun f ->
+                                            let sequenceId = int f.RowKey
                                             let title = if f.Properties.ContainsKey("Title") then f.Properties.["Title"].StringValue else ""
                                             let synopsis = if f.Properties.ContainsKey("Synopsis") then f.Properties.["Synopsis"].StringValue else ""
                                             let bond = if f.Properties.ContainsKey("Bond") then f.Properties.["Bond"].StringValue else ""
                                             let m = if f.Properties.ContainsKey("M") then Some (f.Properties.["M"].StringValue) else None
                                             let q = if f.Properties.ContainsKey("Q") then Some (f.Properties.["Q"].StringValue) else None
+                                            let theEnemy = getEnemies sequenceId |> Seq.toList
+                                            let theGirls = getGirls sequenceId |> Seq.toList
 
-                                            {SequenceId = int f.RowKey; Title = title; Synopsis = synopsis;
-                                             Bond = bond; M = m; Q = q; TheEnemy = []; TheGirls = []})
+                                            {SequenceId = sequenceId; Title = title; Synopsis = synopsis;
+                                             Bond = bond; M = m; Q = q; TheEnemy = theEnemy; TheGirls = theGirls})
                             |> Seq.toList (* <- NOTE this is important the encoder doesn't like IEnumerable need to convert to List *)
 
             return! json movieList next ctx
+        })
+    get "/api/list-media" (fun next ctx ->
+        task {
+            return! json (AzureServices.listBondMedia) next ctx
         })
 }
 
