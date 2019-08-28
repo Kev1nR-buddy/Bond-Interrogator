@@ -29,7 +29,9 @@ let listBondMedia() =
     cloudBlobContainer.SetPermissions(permissions)
 
     // Loop over items within the container and output the length and URI.
-    let blobs = cloudBlobContainer.ListBlobs(null, false)
+    // NOTE arge the first Prefix arg is set to the folder we want to pull medai from
+    // the second 'useFlatBlobListing' returns only blobs (not folders) when set to true
+    let blobs = cloudBlobContainer.ListBlobs("DrNo", true)
                 |> Seq.map (fun item ->
                         match item with
                         | :? CloudBlockBlob as blob ->

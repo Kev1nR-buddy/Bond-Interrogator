@@ -71,7 +71,7 @@ let webApp = router {
         })
     get "/api/list-media" (fun next ctx ->
         task {
-            return! json (AzureServices.listBondMedia) next ctx
+            return! json (AzureServices.listBondMedia()) next ctx
         })
 }
 
