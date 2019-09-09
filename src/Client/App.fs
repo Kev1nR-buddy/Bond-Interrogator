@@ -43,7 +43,7 @@ let init () : Model * Cmd<Msg> =
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel.BondFilmList, msg with
-    | Some counter, BondFilmSelected b ->
+    | Some _, BondFilmSelected b ->
         printf "BondFilmSelected msg"
         let nextModel = { currentModel with BondFilm = Some b; CurrentFilm = Some b.SequenceId }
         nextModel, Cmd.none
@@ -126,8 +126,11 @@ let dropDownList (model : Model) (dispatch : Msg -> unit) =
                                   for m in films do
                                     yield Dropdown.Item.a
                                       [
-                                          Dropdown.Item.IsActive (if model.CurrentFilm.IsSome then (m.SequenceId = model.CurrentFilm.Value) else false)
-                                          Dropdown.Item.Props [ OnClick ( fun _ -> dispatch (BondFilmSelected m)) ]
+                                          Dropdown.Item.IsActive (model.CurrentFilm |> Option.fold (fun _ id -> id = m.SequenceId) false)
+                                          Dropdown.Item.Props
+                                            [
+                                              OnClick ( fun _ -> dispatch (BondFilmSelected m))
+                                            ]
                                       ] [str m.Title ]
                               | _ -> yield Dropdown.Item.a [ ] [str "<Empty>" ] ] ] ] ] ] ]
 
@@ -139,16 +142,13 @@ let filmInfo (model : Model)=
         Column.Offset (Screen.All, Column.Is2) ]
       [ h2 [ ClassName "title" ]
           [
-            match model.BondFilm with
-            | Some b -> yield str b.Title
-            | _ -> yield str "\"Do you expect me to talk?\""
+            yield (model.BondFilm |> Option.fold (fun _ b -> str b.Title) (str "\"Do you expect me to talk?\""))
           ]
         br [ ]
         p [ ClassName "subtitle"]
           [
-            match model.BondFilm with
-              | Some b -> yield str b.Synopsis
-              | _ -> yield str "\"No Mr. Bond, I expect you to choose a film!\"" ] ]
+            yield (model.BondFilm |> Option.fold (fun _ b -> str b.Synopsis) (str "\"No Mr. Bond, I expect you to choose a film!\""))
+          ] ]
 
 let footerContainer =
     Container.container [ ]

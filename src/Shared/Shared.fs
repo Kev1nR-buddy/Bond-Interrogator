@@ -1,7 +1,5 @@
 namespace Shared
 
-type Counter = { Value : int }
-
 type Character = { Name: string; Actor: string }
 
 type BondFilm = {

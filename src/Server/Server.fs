@@ -18,11 +18,6 @@ let port =
     |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
 let webApp = router {
-    get "/api/init" (fun next ctx ->
-        task {
-            let counter = {Value = 42}
-            return! json counter next ctx
-        })
     get "/api/films" (fun next ctx ->
         task {
             let movieList = [ {SequenceId = 1; Title = "Dr. No"; Synopsis = "Dr.No synopsis"; Bond = "Sean Connery"; M = Some "Bernard Lee"; Q = None; TheEnemy = [{ Name = "Dr. No"; Actor = "Joseph Wiseman"}]; TheGirls = [{Name = "Honey Ryder"; Actor = "Ursula Andress"}]}
