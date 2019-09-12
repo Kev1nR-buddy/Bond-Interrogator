@@ -1,22 +1,16 @@
 open System.IO
-open System.Threading.Tasks
-
-open Microsoft.AspNetCore.Builder
-open Microsoft.Extensions.DependencyInjection
 open FSharp.Control.Tasks.V2
 open Giraffe
 open Saturn
 open Shared
-open Microsoft.Azure.Documents.Client
-open Microsoft.Azure.Storage
 open Microsoft.Azure.Cosmos.Table
-open AzureServices
 
 let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" -> None | x -> Some x
 
 let publicPath = Path.GetFullPath "../Client/public"
 
-let storageConnString = "DefaultEndpointsProtocol=https;AccountName=kbrstorageaccount;AccountKey=9f3T1Fco4+c2N9zXI5plUL0sh67lEsxbeNlhHwQ1nRgYZutJeD1w7IQYSQhDtYx1Glb+QA18E/rUxqjtB2xz1g==;EndpointSuffix=core.windows.net"
+let storageConnString = "CONNECT_STR" |> tryGetEnv |> Option.defaultValue ""
+printfn "CONN_STR = %s" storageConnString
 let storageAccount = CloudStorageAccount.Parse(storageConnString)
 // Create the table client.
 let tableClient = storageAccount.CreateCloudTableClient()
@@ -45,11 +39,6 @@ let port =
     |> tryGetEnv |> Option.map uint16 |> Option.defaultValue 8085us
 
 let webApp = router {
-    get "/api/init" (fun next ctx ->
-        task {
-            let counter = {Value = 42}
-            return! json counter next ctx
-        })
     get "/api/films" (fun next ctx ->
         task {
             let movieList = table.ExecuteQuery(query)
@@ -69,9 +58,13 @@ let webApp = router {
 
             return! json movieList next ctx
         })
-    get "/api/list-media" (fun next ctx ->
+    getf "/api/list-media/%s" (fun filmId next ctx ->
         task {
-            return! json (AzureServices.listBondMedia()) next ctx
+            return! json (AzureServices.listBondMedia filmId) next ctx
+        })
+    getf "/api/media-item-character/%s/%s" (fun (filmId, character) next ctx ->
+        task {
+            return! json (AzureServices.getBondMediaCharacterURI filmId character) next ctx
         })
 }
 

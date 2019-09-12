@@ -141,6 +141,40 @@ let dropDownList (model : Model) (dispatch : Msg -> unit) =
                                       ] [str m.Title ]
                               | _ -> yield Dropdown.Item.a [ ] [str "<Empty>" ] ] ] ] ] ] ]
 
+let characterCard imgURI heading body =
+  Column.column [ Column.Width (Screen.All, Column.Is6) ]
+    [ Card.card [ ]
+        [
+          Card.content [     ]
+            [ Content.content [ ]
+                [
+                    Card.image
+                        [ Modifiers [ Modifier.IsPulledLeft
+                                      Modifier.BackgroundColor IsDanger
+                                      Modifier.IsClearfix] ]
+                        [ Image.image [ Image.Is48x48 ]
+                            [ img [ Src imgURI ] ] ]
+                    h4 [ ] [ str heading ]
+                    p [ ] [ str body ]
+                    p [ ]
+                      [ a [ Href "#" ]
+                          [ str "Learn more" ] ] ] ] ] ]
+
+let features =
+    Columns.columns [ Columns.CustomClass "features" ]
+        [
+          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
+                      "James Bond"
+                      "Played by Sean Connery.\nBond is ..."
+          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
+                      "James Bond"
+                      "Played by Sean Connery.\nBond is ..."
+          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
+                      "James Bond"
+                      "Played by Sean Connery.\nBond is ..."
+        ]
+
+
 
 let filmInfo (model : Model)=
     Column.column
@@ -149,16 +183,16 @@ let filmInfo (model : Model)=
         Column.Offset (Screen.All, Column.Is2) ]
       [ h2 [ ClassName "title" ]
           [
-            match model.BondFilm with
-            | Some b -> yield str b.Title
-            | _ -> yield str "\"Do you expect me to talk?\""
+            yield (model.BondFilm |> Option.fold (fun _ b -> str b.Title) (str "\"Do you expect me to talk?\""))
           ]
         br [ ]
         p [ ClassName "subtitle"]
           [
-            match model.BondFilm with
-              | Some b -> yield str b.Synopsis
-              | _ -> yield str "\"No Mr. Bond, I expect you to choose a film!\"" ] ]
+            yield (model.BondFilm |> Option.fold (fun _ b -> str b.Synopsis) (str "\"No Mr. Bond, I expect you to choose a film!\""))
+          ]
+        features
+      ]
+
 
 let footerContainer =
     Container.container [ ]
