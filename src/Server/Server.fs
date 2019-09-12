@@ -9,12 +9,8 @@ let tryGetEnv = System.Environment.GetEnvironmentVariable >> function null | "" 
 
 let publicPath = Path.GetFullPath "../Client/public"
 
-<<<<<<< HEAD
 let storageConnString = "CONNECT_STR" |> tryGetEnv |> Option.defaultValue ""
-printfn "CONN_STR = %s" storageConnString
-=======
-let storageConnString = ""
->>>>>>> d225931b96317347b5d0671b26688056ac377796
+
 let storageAccount = CloudStorageAccount.Parse(storageConnString)
 // Create the table client.
 let tableClient = storageAccount.CreateCloudTableClient()
