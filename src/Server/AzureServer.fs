@@ -1,15 +1,6 @@
 module AzureServices
 
 open System.IO
-open System.Threading.Tasks
-
-open Microsoft.AspNetCore.Builder
-open Microsoft.Extensions.DependencyInjection
-open FSharp.Control.Tasks.V2
-open Giraffe
-open Saturn
-open Shared
-open Microsoft.Azure.Documents.Client
 open Microsoft.Azure.Storage
 open Microsoft.Azure.Storage.Blob
 
@@ -80,6 +71,7 @@ let getBondMediaCharacterURI sequenceId character =
     let blob =
         listBondMediaBlobs sequenceId
         |> Seq.filter (isCharacter character)
-        |> Seq.head
+        |> Seq.tryHead
+        |> Option.map (fun b -> b.Uri.AbsoluteUri)
 
-    blob.Uri.AbsoluteUri
+    blob

@@ -45,7 +45,7 @@ let init () : Model * Cmd<Msg> =
 // these commands in turn, can dispatch messages to which the update function will react.
 let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
     match currentModel.BondFilmList, msg with
-    | Some counter, BondFilmSelected b ->
+    | _, BondFilmSelected b ->
         printf "BondFilmSelected msg"
         let nextModel = { currentModel with BondFilm = Some b; CurrentFilm = Some b.SequenceId }
         nextModel, Cmd.none
@@ -53,8 +53,6 @@ let update (msg : Msg) (currentModel : Model) : Model * Cmd<Msg> =
         let nextModel = { ValidationError = None; ServerState = Loading;  BondFilm = None; BondFilmList = Some films; CurrentFilm = None; IsBurgerOpen = false }
         nextModel, Cmd.none
     | _, ToggleBurger -> { currentModel with IsBurgerOpen = not currentModel.IsBurgerOpen }, Cmd.none
-    | _ -> currentModel, Cmd.none
-
 
 let safeComponents =
     let components =
@@ -141,39 +139,56 @@ let dropDownList (model : Model) (dispatch : Msg -> unit) =
                                       ] [str m.Title ]
                               | _ -> yield Dropdown.Item.a [ ] [str "<Empty>" ] ] ] ] ] ] ]
 
-let characterCard imgURI heading body =
-  Column.column [ Column.Width (Screen.All, Column.Is6) ]
+
+let characterCard filmId character =
+  let imgURI = character.ImageURI |> Option.defaultValue ""
+  let heading = character.Name
+  let body = sprintf "Played by %s.%s is ..." character.Actor character.Name
+  Column.column [ Column.Width (Screen.All, Column.Is4) ]
     [ Card.card [ ]
         [
-          Card.content [     ]
+          Card.content [ ]
             [ Content.content [ ]
                 [
-                    Card.image
-                        [ Modifiers [ Modifier.IsPulledLeft
-                                      Modifier.BackgroundColor IsDanger
-                                      Modifier.IsClearfix] ]
-                        [ Image.image [ Image.Is48x48 ]
-                            [ img [ Src imgURI ] ] ]
-                    h4 [ ] [ str heading ]
-                    p [ ] [ str body ]
-                    p [ ]
-                      [ a [ Href "#" ]
-                          [ str "Learn more" ] ] ] ] ] ]
+                    Media.media []
+                        [
+                            Media.left [ ]
+                                [
+                                    Image.image [ Image.Is64x64 ] [ img [ Src imgURI ] ]
+                                ]
+                            Media.content []
+                                [
+                                   h4 [ ] [ str heading ]
+                                ]
+                        ]
+                    Level.level []
+                        [
+                            p [ ] [ str body ]
+                        ]
+                ] ] ] ]
 
-let features =
-    Columns.columns [ Columns.CustomClass "features" ]
+let characters (model : Model) =
+    let filmId, characterList = model.BondFilm |> Option.fold (fun bfCs bf -> bf.SequenceId, [ bf.Bond; bf.M; bf.Q ]) (0,[])
+    printfn "no characters: %d" (characterList.Length)
+    let ccs = characterList
+              |> Seq.choose id
+              |> Seq.map (characterCard filmId)
+    characterList |> Seq.iter (fun cc ->
+                        match cc with
+                        | Some c -> printfn "character %s" c.Name
+                        | None -> printfn "No character defined" )
+    if ccs |> Seq.isEmpty
+    then
+      printfn "Empty sequennce"
+      Columns.columns [ Columns.CustomClass "features" ] []
+    else
+      printfn "non-Empty sequennce"
+
+      Columns.columns [ Columns.CustomClass "features" ]
         [
-          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
-                      "James Bond"
-                      "Played by Sean Connery.\nBond is ..."
-          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
-                      "James Bond"
-                      "Played by Sean Connery.\nBond is ..."
-          characterCard "https://kbrstorageaccount.blob.core.windows.net/bond-film-media/1/Honey%20Ryder.jpg"
-                      "James Bond"
-                      "Played by Sean Connery.\nBond is ..."
+          for cc in ccs do
+            yield cc
         ]
-
 
 
 let filmInfo (model : Model)=
@@ -190,7 +205,7 @@ let filmInfo (model : Model)=
           [
             yield (model.BondFilm |> Option.fold (fun _ b -> str b.Synopsis) (str "\"No Mr. Bond, I expect you to choose a film!\""))
           ]
-        features
+        characters model
       ]
 
 

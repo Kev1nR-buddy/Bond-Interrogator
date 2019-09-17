@@ -26,13 +26,13 @@ let getEnemies bondFilmSequenceId =
     tableClient.GetTableReference("TheEnemy")
                .ExecuteQuery(
                    TableQuery().Where(sprintf "PartitionKey eq '%d'" bondFilmSequenceId))
-    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue })
+    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue; ImageURI = None })
 
 let getGirls bondFilmSequenceId =
     tableClient.GetTableReference("TheGirls")
                .ExecuteQuery(
                    TableQuery().Where(sprintf "PartitionKey eq '%d'" bondFilmSequenceId))
-    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue })
+    |> Seq.map (fun e -> { Name = e.Properties.["Character"].StringValue; Actor = e.Properties.["Actor"].StringValue; ImageURI = None })
 
 let port =
     "SERVER_PORT"
@@ -41,6 +41,7 @@ let port =
 let webApp = router {
     get "/api/films" (fun next ctx ->
         task {
+            let getImgURI filmId character = AzureServices.getBondMediaCharacterURI (string filmId) character
             let movieList = table.ExecuteQuery(query)
                             |> Seq.map (fun f ->
                                             let sequenceId = int f.RowKey
@@ -53,7 +54,10 @@ let webApp = router {
                                             let theGirls = getGirls sequenceId |> Seq.toList
 
                                             {SequenceId = sequenceId; Title = title; Synopsis = synopsis;
-                                             Bond = bond; M = m; Q = q; TheEnemy = theEnemy; TheGirls = theGirls})
+                                             Bond = Some {Name="James Bond"; Actor=bond; ImageURI = (getImgURI sequenceId "James Bond") };
+                                             M = m |> Option.map (fun actor -> {Name="M"; Actor=actor; ImageURI = (getImgURI sequenceId "M") });
+                                             Q = q |> Option.map (fun actor -> {Name="Q"; Actor=actor; ImageURI = (getImgURI sequenceId "Q") });
+                                             TheEnemy = theEnemy; TheGirls = theGirls})
                             |> Seq.toList (* <- NOTE this is important the encoder doesn't like IEnumerable need to convert to List *)
 
             return! json movieList next ctx

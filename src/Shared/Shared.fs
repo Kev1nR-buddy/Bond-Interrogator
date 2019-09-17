@@ -1,14 +1,14 @@
 namespace Shared
 
-type Character = { Name: string; Actor: string }
+type Character = { Name: string; Actor: string; ImageURI: string option }
 
 type BondFilm = {
     SequenceId: int
     Title: string
     Synopsis: string
-    Bond: string
-    M: string option
-    Q: string option
+    Bond: Character option
+    M: Character option
+    Q: Character option
     TheEnemy: Character list
     TheGirls: Character list
 }

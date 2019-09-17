@@ -47,7 +47,7 @@ html, body {
 }
 
 .features {
-  padding: 5rem 0;
+  padding: 2rem 0;
 }
 
 .box.cta {
@@ -63,14 +63,23 @@ html, body {
   color: #00d1b2;
 }
 
+.card-content {
+    padding: 1rem 0.5rem;
+}
 .card-content .content {
   font-size: 14px;
-  margin: 1rem 1rem;
+  margin: 0rem;
+  padding: 0rem;
 
   h4 {
     font-size: 16px;
     font-weight: 700;
   }
+}
+
+.content figure {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
 }
 
 .card {
