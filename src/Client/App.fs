@@ -169,21 +169,15 @@ let characterCard filmId character =
 
 let characters (model : Model) =
     let filmId, characterList = model.BondFilm |> Option.fold (fun bfCs bf -> bf.SequenceId, [ bf.Bond; bf.M; bf.Q ]) (0,[])
-    printfn "no characters: %d" (characterList.Length)
+
     let ccs = characterList
               |> Seq.choose id
               |> Seq.map (characterCard filmId)
-    characterList |> Seq.iter (fun cc ->
-                        match cc with
-                        | Some c -> printfn "character %s" c.Name
-                        | None -> printfn "No character defined" )
+
     if ccs |> Seq.isEmpty
     then
-      printfn "Empty sequennce"
       Columns.columns [ Columns.CustomClass "features" ] []
     else
-      printfn "non-Empty sequennce"
-
       Columns.columns [ Columns.CustomClass "features" ]
         [
           for cc in ccs do
